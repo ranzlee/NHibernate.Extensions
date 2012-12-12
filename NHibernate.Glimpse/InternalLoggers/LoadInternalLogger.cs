@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Web;
 using NHibernate.Glimpse.Core;
+using NHibernate.Glimpse.Providers;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
@@ -14,13 +14,13 @@ namespace NHibernate.Glimpse.InternalLoggers
             if (message == null) return;
             if (!message.ToString().ToLower().Trim().StartsWith(TargetMessage)) return;
             if (!LoggerFactory.LogRequest()) return;
-            var context = HttpContext.Current;
+            var context = new RequestContextFactory().GetRequestContextProvider().GetRequestContext();
             if (context == null) return;
-            var l = (IList<LogStatistic>)context.Items[Plugin.GlimpseSqlStatsKey];
+            var l = (IList<LogStatistic>)context[Plugin.GlimpseSqlStatsKey];
             if (l == null)
             {
                 l = new List<LogStatistic>();
-                context.Items.Add(Plugin.GlimpseSqlStatsKey, l);
+                context.Add(Plugin.GlimpseSqlStatsKey, l);
             }
             l.Add(new LogStatistic
                       {

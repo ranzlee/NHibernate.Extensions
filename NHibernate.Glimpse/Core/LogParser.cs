@@ -1,19 +1,19 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Web;
 
 namespace NHibernate.Glimpse.Core
 {
     public class LogParser
     {
-        internal RequestDebugInfo Transform(HttpContextBase context)
+        internal RequestDebugInfo Transform(IDictionary context)
         {
             var selects = 0;
             var updates = 0;
             var deletes = 0;
             var inserts = 0;
             var batchCommands = 0;
-            var events = (IList<LogStatistic>)context.Items[Plugin.GlimpseSqlStatsKey];
+            var events = (IList<LogStatistic>)context[Plugin.GlimpseSqlStatsKey];
             if (events == null) return null;
             var info = new RequestDebugInfo
                 {
@@ -21,7 +21,7 @@ namespace NHibernate.Glimpse.Core
                 };
             foreach (var loggingEvent in events)
             {
-                if (!string.IsNullOrWhiteSpace(loggingEvent.Sql))
+                if (!string.IsNullOrEmpty(loggingEvent.Sql)  && loggingEvent.Sql.Trim() != string.Empty)
                 {
                     var detail = loggingEvent.Sql.TrimStart(' ', '\n', '\r');
                     if (detail.StartsWith("select", StringComparison.OrdinalIgnoreCase)) selects++;

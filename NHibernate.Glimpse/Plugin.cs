@@ -1,29 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Glimpse.Core.Tab.Assist;
 using Glimpse.Core.Extensibility;
+using NHibernate.Glimpse.Providers;
 using NHibernate.Impl;
 using NHibernate.Glimpse.Core;
 using Assist = Glimpse.Core.Tab.Assist;
 
 namespace NHibernate.Glimpse
 {
-    public class Plugin : ITab
+    public class Plugin : ITab, IDocumentation
     {
         private static readonly object Lock = new object();
         internal static readonly IList<ISessionFactory> SessionFactories = new List<ISessionFactory>(); 
         internal const string GlimpseStore = "NHibernate.Glimpse";
         internal const string GlimpseSqlStatsKey = "NHibernate.Glimpse.Sql.Stats";
         internal const string GlimpseEntityLoadStatsKey = "NHibernate.Glimpse.Entity.Load.Stats";
-
+        
         public object GetData(ITabContext context)
         {
-            if (context == null) return string.Empty;
-            var httpContext = context.GetRequestContext<HttpContextBase>();
+            var requestContext = new RequestContextFactory().GetRequestContextProvider().GetRequestContext();
+            if (requestContext == null) return string.Empty;
             var logParser = new LogParser();
-            var stat = logParser.Transform(httpContext);
+            var stat = logParser.Transform(requestContext);
             if (stat == null)
             {
                 return string.Empty;
@@ -40,9 +40,8 @@ namespace NHibernate.Glimpse
                          .Column(stat.Deletes)
                          .Column(stat.Batch)
                          .ErrorIf(stat.Selects > 50);
-
             var detailSection = new TabSection("Log");
-            var details = httpContext.Items[GlimpseSqlStatsKey];
+            var details = requestContext[GlimpseSqlStatsKey];
             if (details != null)
             {
                 var list = details as IEnumerable<LogStatistic>;
@@ -95,12 +94,12 @@ namespace NHibernate.Glimpse
                 }
             }
             var data = Assist.Plugin.Create("Section", "Content");
-            data.AddRow().Column("Session Summary").Column(headerSection);
-            data.AddRow().Column("Session Details").Column(detailSection);
+            data.AddRow().Column("Request Summary").Column(headerSection);
+            data.AddRow().Column("Request Details").Column(detailSection);
             if (!SessionFactories.Any(f => f.Statistics.IsStatisticsEnabled)) return data;
             foreach (var sessionFactory in SessionFactories)
             {
-                var factoryDetailSection = new TabSection("Statistic Type", "Value");
+                var factoryDetailSection = new TabSection("Statistic", "Value");
                 factoryDetailSection.AddRow().Column("Close Statement Count").Column(sessionFactory.Statistics.CloseStatementCount);
                 factoryDetailSection.AddRow().Column("Collection Fetch Count").Column(sessionFactory.Statistics.CollectionFetchCount);
                 factoryDetailSection.AddRow().Column("Collection Load Count").Column(sessionFactory.Statistics.CollectionLoadCount);
@@ -166,6 +165,11 @@ namespace NHibernate.Glimpse
             {
                 if (!SessionFactories.Contains(sessionFactory)) SessionFactories.Add(sessionFactory);    
             }
+        }
+
+        public string DocumentationUri
+        {
+            get { return "https://github.com/ranzlee/NHibernate.Extensions/wiki/NHibernate.Glimpse"; }
         }
     }
 }

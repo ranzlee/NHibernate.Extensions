@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web;
 using Glimpse.Core.Extensibility;
 using NHibernate.Glimpse.Core;
+using NHibernate.Glimpse.Providers;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
@@ -18,9 +18,8 @@ namespace NHibernate.Glimpse.InternalLoggers
         {
             if (message == null) return;
             if (!LoggerFactory.LogRequest()) return;
-            var context = HttpContext.Current;
+            var context = new RequestContextFactory().GetRequestContextProvider().GetRequestContext();
             if (context == null) return;
-
             var stackFrames = new System.Diagnostics.StackTrace().GetFrames();
             var methods = new List<MethodBase>();
             if (stackFrames != null)
@@ -35,18 +34,18 @@ namespace NHibernate.Glimpse.InternalLoggers
                     // ReSharper restore ConditionIsAlwaysTrueOrFalse
                     {
                         var assem = type.Assembly;
-                        if (assem == ThisAssem) continue;
-                        if (assem == NhAssem) continue;
-                        if (assem == GlimpseAssem) continue;    
+                        if (Equals(assem, ThisAssem)) continue;
+                        if (Equals(assem, NhAssem)) continue;
+                        if (Equals(assem, GlimpseAssem)) continue;    
                     }
                     methods.Add(frame.GetMethod());
                 }
             }
-            var l = (IList<LogStatistic>)context.Items[Plugin.GlimpseSqlStatsKey];
+            var l = (IList<LogStatistic>)context[Plugin.GlimpseSqlStatsKey];
             if (l == null)
             {
                 l = new List<LogStatistic>();
-                context.Items.Add(Plugin.GlimpseSqlStatsKey, l);
+                context.Add(Plugin.GlimpseSqlStatsKey, l);
             }
             // ReSharper disable ConditionIsAlwaysTrueOrFalse
             var frames = methods
