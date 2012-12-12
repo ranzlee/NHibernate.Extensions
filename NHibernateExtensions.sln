@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.Glimpse", "NHibernate.Glimpse\NHibernate.Glimpse.csproj", "{588C88A1-ADFD-4501-B42F-6977D932CCDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.DependencyInjection", "NHibernate.DependencyInjection\NHibernate.DependencyInjection.csproj", "{6160F667-0FDC-457A-B8A0-CECFA718D37B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.DependencyInjection.Tests", "NHibernate.DependencyInjection.Tests\NHibernate.DependencyInjection.Tests.csproj", "{814D27A2-7FB9-4427-9042-5DD902FB52D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.DataAnnotations", "NHibernate.DataAnnotations\NHibernate.DataAnnotations.csproj", "{D4D040F4-6E7E-4C24-9416-25F632D8A14C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.DataAnnotations.Tests", "NHibernate.DataAnnotations.Tests\NHibernate.DataAnnotations.Tests.csproj", "{B6081D09-1599-4504-8026-88079B0FB6F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.Session", "NHibernate.Session\NHibernate.Session.csproj", "{795CD4A3-6EAF-42EF-ADB5-10DE613EB0D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.Session.Tests", "NHibernate.Session.Tests\NHibernate.Session.Tests.csproj", "{428833A8-D7D3-47EF-80D1-DF0351125A23}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{588C88A1-ADFD-4501-B42F-6977D932CCDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{588C88A1-ADFD-4501-B42F-6977D932CCDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{588C88A1-ADFD-4501-B42F-6977D932CCDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{588C88A1-ADFD-4501-B42F-6977D932CCDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6160F667-0FDC-457A-B8A0-CECFA718D37B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6160F667-0FDC-457A-B8A0-CECFA718D37B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6160F667-0FDC-457A-B8A0-CECFA718D37B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6160F667-0FDC-457A-B8A0-CECFA718D37B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{814D27A2-7FB9-4427-9042-5DD902FB52D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{814D27A2-7FB9-4427-9042-5DD902FB52D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{814D27A2-7FB9-4427-9042-5DD902FB52D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{814D27A2-7FB9-4427-9042-5DD902FB52D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4D040F4-6E7E-4C24-9416-25F632D8A14C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4D040F4-6E7E-4C24-9416-25F632D8A14C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4D040F4-6E7E-4C24-9416-25F632D8A14C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4D040F4-6E7E-4C24-9416-25F632D8A14C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6081D09-1599-4504-8026-88079B0FB6F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6081D09-1599-4504-8026-88079B0FB6F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6081D09-1599-4504-8026-88079B0FB6F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6081D09-1599-4504-8026-88079B0FB6F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{795CD4A3-6EAF-42EF-ADB5-10DE613EB0D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{795CD4A3-6EAF-42EF-ADB5-10DE613EB0D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{795CD4A3-6EAF-42EF-ADB5-10DE613EB0D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{795CD4A3-6EAF-42EF-ADB5-10DE613EB0D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{428833A8-D7D3-47EF-80D1-DF0351125A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{428833A8-D7D3-47EF-80D1-DF0351125A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{428833A8-D7D3-47EF-80D1-DF0351125A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{428833A8-D7D3-47EF-80D1-DF0351125A23}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

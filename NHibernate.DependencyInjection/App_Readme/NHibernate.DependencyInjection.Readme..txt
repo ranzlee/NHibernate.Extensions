@@ -1,0 +1,16 @@
+﻿
+
+//register the bytecode provider with NHibernate
+Initializer.RegisterBytecodeProvider(new EntityInjector());
+
+//implement a IEntityInjector
+//Anytime NHibernate needs to create an entity (or proxy), a call to GetConstructorParameters is made
+//evaluate the type and return the constructor arguments, or null for a parameterless constructor
+public class EntityInjector : IEntityInjector
+{
+    public object[] GetConstructorParameters(System.Type type)
+    {
+        if (type == typeof(DependencyInjectionCat)) return new object[] {new CatBehavior()};
+        return null;
+    }
+}

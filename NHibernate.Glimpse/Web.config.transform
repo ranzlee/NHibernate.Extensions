@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <appSettings>
+    <add key="nhibernate-logger" value="NHibernate.Glimpse.LoggerFactory, NHibernate.Glimpse"/>
+    <add key="NHibernate.Glimpse.Loggers" value="command,connection,flush,load,transaction"/>
+  </appSettings>
+</configuration>

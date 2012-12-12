@@ -1,0 +1,60 @@
+﻿The NHibernate.Session.Marshaler is an ISession context provider for NHibernate.  It is a simple process to create a 
+unit of work implemenation that works identically in web (per request) or per process level environments.  The only
+difference is that in per process environments, a commit will also spin up a new transaction so that processing can 
+continue.  This can be useful in a check-point restart pattern for batch processing.
+
+**updated in 8.2 - the marshaler can now wrap a singleton session in cases where you need multiple session factories. 
+This can be useful for batch automation programs that need to use the same infrastructure initialization configuration.
+The marshaler can now create stateless sessions for cases where 1st level cache is not needed.
+
+the Marshaler uses the NHibernate.Context.WebSessionContext when HttpContext is detected, otherwise 
+NHibernate.Context.ThreadStaticSessionContext is used. 
+
+Typical setup:
+
+//Create a unit of work wrapper for each session factory you need (typically only one)
+
+public static class UnitOfWork
+{
+    private static NHibernate.Session.Marshaler _marshaler;
+
+    public static void Initialize(NHibernate.Session.Marshaler marshaler) { _marshaler = marshaler; }
+
+    public static ISession Session { get { return _marshaler.CurrentSession; } }
+
+    public static bool HasSession { get { return _marshaler.HasSession; } }
+
+    public static void Commit() { _marshaler.Commit(); }
+
+    public static void End() { _marshaler.End(); }
+}
+
+//In Global.asax:
+
+protected void Application_Start()
+{
+    AreaRegistration.RegisterAllAreas();
+    RegisterGlobalFilters(GlobalFilters.Filters);
+    RegisterRoutes(RouteTable.Routes);
+
+    var config = new NHibernate.Cfg.Configuration();
+    //... setup your configuration
+    
+    //instantiate a single NHibernate.Session.Marshaler for each factory (again, typically only one)
+    var marshaler = new Marshaler(config);
+    
+    //initialize the unit of work wrapper
+    UnitOfWork.Initialize(marshaler);
+}
+
+void Application_EndRequest(Object source, EventArgs e)
+{           
+    UnitOfWork.Commit();
+    UnitOfWork.End();               
+}
+
+//usage:
+
+var c = new Cat("meow") 
+{ BirthDate = DateTime.Now.AddYears(-2), Gender = "Female", Name = "Fluffy" };
+UnitOfWork.Session.Save(c);
