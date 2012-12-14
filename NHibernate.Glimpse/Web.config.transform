@@ -3,9 +3,11 @@
   <appSettings>
     <add key="nhibernate-logger" value="NHibernate.Glimpse.LoggerFactory, NHibernate.Glimpse"/>
     <add key="NHibernate.Glimpse.Loggers" value="command"/>
-    <!-- options...
+    <!-- all loggers
     <add key="NHibernate.Glimpse.Loggers" value="command,connection,flush,load,transaction"/>
     -->
+    <!-- implement a custom provider if you need to
     <add key="NHibernate.Glimpse.Extensibility.IContextProvider" value=""/>
+    -->
   </appSettings>
 </configuration>
