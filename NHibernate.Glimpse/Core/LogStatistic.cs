@@ -17,9 +17,9 @@ namespace NHibernate.Glimpse.Core
 
         internal TimerResult Point { get; set; }
 
-        internal System.Type ExecutionType { get; set; }
+        internal string ExecutionType { get; set; }
 
-        internal MethodInfo ExecutionMethod { get; set; }
+        internal string ExecutionMethod { get; set; }
         
         internal string CommandNotification { get; set; }
 

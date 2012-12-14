@@ -76,9 +76,11 @@ namespace NHibernate.Glimpse.InternalLoggers
                                        ? null
                                        : (methods.Count == 0)
                                              ? null
-                                             : methods[0].DeclaringType ?? typeof (object),
+                                             : (methods[0].DeclaringType == null)
+                                                   ? "Object"
+                                                   : methods[0].DeclaringType.Name,
                                ExecutionMethod =
-                                   (MethodInfo) ((point == null) ? null : (methods.Count == 0) ? null : methods[0])
+                                   ((point == null) ? null : (methods.Count == 0) ? null : methods[0].Name)
                            };
             l.Add(item);
             var d = OnSqlCommandExecuted;
@@ -88,8 +90,8 @@ namespace NHibernate.Glimpse.InternalLoggers
                                    {
                                        ClientId = context["__GlimpseRequestId"].ToString(),
                                        Message =
-                                           new PointTimelineMessage(item.Point, item.ExecutionType, item.ExecutionMethod,
-                                                                    string.Format("{0} - {1} :: {2}", item.Id, item.ExecutionType.Name, item.ExecutionMethod.Name), "ASP.NET")
+                                           new PointTimelineMessage(item.Point, null, null,
+                                                                    string.Format("{0} - {1} :: {2}", item.Id, item.ExecutionType, item.ExecutionMethod), "ASP.NET")
                                    });
             }
         }
