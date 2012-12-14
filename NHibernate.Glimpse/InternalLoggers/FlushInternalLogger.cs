@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using NHibernate.Glimpse.Core;
-using NHibernate.Glimpse.Providers;
+using NHibernate.Glimpse.Extensibility;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
@@ -12,7 +12,7 @@ namespace NHibernate.Glimpse.InternalLoggers
         {
             if (message == null) return;
             if (!LoggerFactory.LogRequest()) return;
-            var context = new RequestContextFactory().GetRequestContextProvider().GetRequestContext();
+            var context = new ContextFactory().GetContextProvider().GetContext();
             if (context == null) return;
             var l = (IList<LogStatistic>)context[Plugin.GlimpseSqlStatsKey];
             if (l == null)

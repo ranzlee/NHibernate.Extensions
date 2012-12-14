@@ -2,7 +2,10 @@
 <configuration>
   <appSettings>
     <add key="nhibernate-logger" value="NHibernate.Glimpse.LoggerFactory, NHibernate.Glimpse"/>
+    <add key="NHibernate.Glimpse.Loggers" value="command"/>
+    <!-- options...
     <add key="NHibernate.Glimpse.Loggers" value="command,connection,flush,load,transaction"/>
-    <add key="NHibernate.Glimpse.ContextProvider" value=""/>
+    -->
+    <add key="NHibernate.Glimpse.Extensibility.IContextProvider" value=""/>
   </appSettings>
 </configuration>

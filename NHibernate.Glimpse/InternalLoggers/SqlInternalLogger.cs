@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Glimpse.Core.Extensibility;
+using Glimpse.Core.Message;
 using NHibernate.Glimpse.Core;
-using NHibernate.Glimpse.Providers;
+using NHibernate.Glimpse.Extensibility;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
@@ -13,13 +14,25 @@ namespace NHibernate.Glimpse.InternalLoggers
         private static readonly Assembly ThisAssem = typeof(SqlInternalLogger).Assembly;
         private static readonly Assembly NhAssem = typeof(IInternalLogger).Assembly;
         private static readonly Assembly GlimpseAssem = typeof(ITab).Assembly;
+        internal delegate void SqlCommandExecuted(object sender, SqlCommandExecutedArgs args);
+
+        internal static event SqlCommandExecuted OnSqlCommandExecuted;
 
         public void Debug(object message)
         {
             if (message == null) return;
             if (!LoggerFactory.LogRequest()) return;
-            var context = new RequestContextFactory().GetRequestContextProvider().GetRequestContext();
+            var context = new ContextFactory().GetContextProvider().GetContext();
             if (context == null) return;
+            TimerResult point = null;
+            if (context.Contains("__GlimpseTimer"))
+            {
+                var timer = context["__GlimpseTimer"] as IExecutionTimer;
+                if (timer != null)
+                {
+                    point = timer.Point();
+                }
+            }
             var stackFrames = new System.Diagnostics.StackTrace().GetFrames();
             var methods = new List<MethodBase>();
             if (stackFrames != null)
@@ -52,11 +65,33 @@ namespace NHibernate.Glimpse.InternalLoggers
                 .Select(method => string.Format("{0} -> {1}", (method.DeclaringType == null) ? "DYNAMIC" : method.DeclaringType.ToString(), method))
                 .ToList();
             // ReSharper restore ConditionIsAlwaysTrueOrFalse
-            l.Add(new LogStatistic
-                      {
-                          Sql = message.ToString(),
-                          StackFrames = frames
-                      });
+            var item = new LogStatistic
+                           {
+                               Id = Guid.NewGuid().ToString(),
+                               Sql = message.ToString(),
+                               StackFrames = frames,
+                               Point = point,
+                               ExecutionType =
+                                   (point == null)
+                                       ? null
+                                       : (methods.Count == 0)
+                                             ? null
+                                             : methods[0].DeclaringType ?? typeof (object),
+                               ExecutionMethod =
+                                   (MethodInfo) ((point == null) ? null : (methods.Count == 0) ? null : methods[0])
+                           };
+            l.Add(item);
+            var d = OnSqlCommandExecuted;
+            if (d != null && context.Contains("__GlimpseRequestId") && item.Point != null)
+            {
+                d.Invoke(this, new SqlCommandExecutedArgs
+                                   {
+                                       ClientId = context["__GlimpseRequestId"].ToString(),
+                                       Message =
+                                           new PointTimelineMessage(item.Point, item.ExecutionType, item.ExecutionMethod,
+                                                                    string.Format("{0} - {1} :: {2}", item.Id, item.ExecutionType.Name, item.ExecutionMethod.Name), "ASP.NET")
+                                   });
+            }
         }
 
         public void Error(object message)

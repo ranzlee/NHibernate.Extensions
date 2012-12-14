@@ -3,31 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using Glimpse.Core.Tab.Assist;
 using Glimpse.Core.Extensibility;
-using NHibernate.Glimpse.Providers;
+using NHibernate.Glimpse.Extensibility;
+using NHibernate.Glimpse.InternalLoggers;
 using NHibernate.Impl;
 using NHibernate.Glimpse.Core;
 using Assist = Glimpse.Core.Tab.Assist;
 
 namespace NHibernate.Glimpse
 {
-    public class Plugin : ITab, IDocumentation
+    public class Plugin : ITab, IDocumentation, ITabSetup, IKey
     {
         private static readonly object Lock = new object();
         internal static readonly IList<ISessionFactory> SessionFactories = new List<ISessionFactory>(); 
         internal const string GlimpseStore = "NHibernate.Glimpse";
         internal const string GlimpseSqlStatsKey = "NHibernate.Glimpse.Sql.Stats";
         internal const string GlimpseEntityLoadStatsKey = "NHibernate.Glimpse.Entity.Load.Stats";
+        private IMessageBroker _messageBroker;
         
         public object GetData(ITabContext context)
         {
-            var requestContext = new RequestContextFactory().GetRequestContextProvider().GetRequestContext();
-            if (requestContext == null) return string.Empty;
+            var tabContext = new ContextFactory().GetContextProvider().GetContext();
+            if (tabContext == null) return string.Empty;
             var logParser = new LogParser();
-            var stat = logParser.Transform(requestContext);
-            if (stat == null)
-            {
-                return string.Empty;
-            }
+            var stat = logParser.Transform(tabContext);
+            if (stat == null) return string.Empty;
             var headerSection = new TabSection("Selects",
                                                "Inserts",
                                                "Updates",
@@ -41,7 +40,7 @@ namespace NHibernate.Glimpse
                          .Column(stat.Batch)
                          .ErrorIf(stat.Selects > 50);
             var detailSection = new TabSection("Log");
-            var details = requestContext[GlimpseSqlStatsKey];
+            var details = tabContext[GlimpseSqlStatsKey];
             if (details != null)
             {
                 var list = details as IEnumerable<LogStatistic>;
@@ -53,32 +52,39 @@ namespace NHibernate.Glimpse
                         if (sqlCount == 50) break;
                         if (!string.IsNullOrEmpty(item.CommandNotification))
                         {
-                            detailSection.AddRow().Column(item.CommandNotification);
+                            detailSection.AddRow().Column(string.Format("!<span style='color:Red;'>Command: {0}</span>!", item.CommandNotification.Trim()));
                             continue;
                         }
                         if (!string.IsNullOrEmpty(item.ConnectionNotification))
                         {
-                            detailSection.AddRow().Column(item.ConnectionNotification);
+                            detailSection.AddRow().Column(string.Format("!<span style='color:Teal;'>Connection: {0}</span>!", item.ConnectionNotification.Trim()));
                             continue;
                         }
                         if (!string.IsNullOrEmpty(item.FlushNotification))
                         {
-                            detailSection.AddRow().Column(item.FlushNotification);
+                            detailSection.AddRow().Column(string.Format("!<span style='color:DarkSlateGray;'>Flush: {0}</span>!", item.FlushNotification.Trim()));
                             continue;
                         }
                         if (!string.IsNullOrEmpty(item.LoadNotification))
                         {
-                            detailSection.AddRow().Column(item.LoadNotification);
+                            detailSection.AddRow().Column(string.Format("!<span style='color:DarkSlateBlue;'>Load: {0}</span>!", item.LoadNotification.Trim()));
                             continue;
                         }
                         if (!string.IsNullOrEmpty(item.TransactionNotification))
                         {
-                            detailSection.AddRow().Column(item.TransactionNotification);
+                            detailSection.AddRow().Column(string.Format("!<span style='color:Darkorange;'>Transaction: {0}</span>!", item.TransactionNotification.Trim()));
                             continue;
                         }
                         if (!string.IsNullOrEmpty(item.Sql))
                         {
-                            detailSection.AddRow().Column(string.Format("!<code class='prettyprint glimpse-code' data-codeType='sql'>{0}</code>!", item.Sql));
+                            //if (item.Point != null)
+                            //{
+                            //    context.MessageBroker.Publish(new PointTimelineMessage(item.Point, item.ExecutionType, item.ExecutionMethod, "SQL Command Execution", "ASP.NET"));    
+                            //}
+                            detailSection
+                                .AddRow()
+                                .Column(string.Format("!<div style='color:RoyalBlue ;'>{0}</div><code class='prettyprint glimpse-code' data-codeType='sql'>{1}</code>!", item.Id, item.Sql))
+                                .Selected();
                             sqlCount += 1;
                         }
                         var stackFrames = new TabSection("Stack Trace");
@@ -139,6 +145,11 @@ namespace NHibernate.Glimpse
             return data;
         }
 
+        public string Key
+        {
+            get { return "NHibernate"; }
+        }
+
         public string Name
         {
             get { return "NHibernate"; }
@@ -170,6 +181,24 @@ namespace NHibernate.Glimpse
         public string DocumentationUri
         {
             get { return "https://github.com/ranzlee/NHibernate.Extensions/wiki/NHibernate.Glimpse"; }
+        }
+
+        public void Setup(ITabSetupContext context)
+        {
+            _messageBroker = context.MessageBroker;
+            SqlInternalLogger.OnSqlCommandExecuted += OnSqlCommandExecuted;
+        }
+
+        void OnSqlCommandExecuted(object sender, SqlCommandExecutedArgs args)
+        {
+            var context = new ContextFactory().GetContextProvider().GetContext();
+            if (context.Contains("__GlimpseRequestId"))
+            {
+                if (context["__GlimpseRequestId"].ToString() == args.ClientId)
+                {
+                    _messageBroker.Publish(args.Message);
+                }
+            }
         }
     }
 }

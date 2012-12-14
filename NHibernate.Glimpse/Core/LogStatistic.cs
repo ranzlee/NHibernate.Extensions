@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Reflection;
+using Glimpse.Core.Extensibility;
 
 namespace NHibernate.Glimpse.Core
 {
@@ -9,8 +11,16 @@ namespace NHibernate.Glimpse.Core
             StackFrames = new List<string>();
         }
 
+        internal string Id { get; set; }
+
         internal string Sql { get; set; }
 
+        internal TimerResult Point { get; set; }
+
+        internal System.Type ExecutionType { get; set; }
+
+        internal MethodInfo ExecutionMethod { get; set; }
+        
         internal string CommandNotification { get; set; }
 
         internal string LoadNotification { get; set; }
