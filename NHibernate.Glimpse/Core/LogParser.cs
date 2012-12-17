@@ -1,25 +1,23 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace NHibernate.Glimpse.Core
 {
     public class LogParser
     {
-        internal RequestDebugInfo Transform(IDictionary context)
+        internal RequestDebugInfo Transform(IEnumerable<LogStatistic> messages)
         {
             var selects = 0;
             var updates = 0;
             var deletes = 0;
             var inserts = 0;
             var batchCommands = 0;
-            var events = (IList<LogStatistic>)context[Plugin.GlimpseSqlStatsKey];
-            if (events == null) return null;
+            if (messages == null) return null;
             var info = new RequestDebugInfo
                 {
                     GlimpseKey = Guid.NewGuid()
                 };
-            foreach (var loggingEvent in events)
+            foreach (var loggingEvent in messages)
             {
                 if (!string.IsNullOrEmpty(loggingEvent.Sql)  && loggingEvent.Sql.Trim() != string.Empty)
                 {

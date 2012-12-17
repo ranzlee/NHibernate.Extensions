@@ -1,31 +1,32 @@
 using System;
-using System.Collections.Generic;
 using NHibernate.Glimpse.Core;
-using NHibernate.Glimpse.Extensibility;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
     internal class LoadInternalLogger : IInternalLogger
     {
+        internal delegate void Logging(object sender, LoggingArgs args);
+        internal static event Logging OnLogging;
+
         private const string TargetMessage = "done materializing entity";
 
         public void Debug(object message)
         {
+            if (OnLogging == null) return;
             if (message == null) return;
             if (!message.ToString().ToLower().Trim().StartsWith(TargetMessage)) return;
             if (!LoggerFactory.LogRequest()) return;
-            var context = new ContextFactory().GetContextProvider().GetContext();
-            if (context == null) return;
-            var l = (IList<LogStatistic>)context[Plugin.GlimpseSqlStatsKey];
-            if (l == null)
+            var onLogging = OnLogging;
+            if (onLogging != null)
             {
-                l = new List<LogStatistic>();
-                context.Add(Plugin.GlimpseSqlStatsKey, l);
+                onLogging.Invoke(this, new LoggingArgs
+                {
+                    Message = new LogStatistic(null, null)
+                    {
+                        LoadNotification = message.ToString().Replace(TargetMessage, string.Empty).Trim().UppercaseFirst()
+                    }
+                });
             }
-            l.Add(new LogStatistic
-                      {
-                          LoadNotification = message.ToString().Replace(TargetMessage, string.Empty).Trim().UppercaseFirst()
-                      });
         }
 
         public void Error(object message)

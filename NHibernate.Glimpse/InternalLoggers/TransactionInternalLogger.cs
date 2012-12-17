@@ -1,36 +1,37 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using NHibernate.Glimpse.Core;
-using NHibernate.Glimpse.Extensibility;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
     internal class TransactionInternalLogger : IInternalLogger
     {
+        internal delegate void Logging(object sender, LoggingArgs args);
+        internal static event Logging OnLogging;
+
         public void Debug(object message)
         {
+            if (OnLogging == null) return;
             if (message == null) return;
             if (!LoggerFactory.LogRequest()) return;
-            var context = new ContextFactory().GetContextProvider().GetContext();
-            if (context == null) return;
-            var l = (IList<LogStatistic>)context[Plugin.GlimpseSqlStatsKey];
-            if (l == null)
-            {
-                l = new List<LogStatistic>();
-                context.Add(Plugin.GlimpseSqlStatsKey, l);
-            }
             var timestamp = DateTime.Now;
-            l.Add(new LogStatistic
-                      {
-                          TransactionNotification =
+            var onLogging = OnLogging;
+            if (onLogging != null)
+            {
+                onLogging.Invoke(this, new LoggingArgs
+                {
+                    Message = new LogStatistic(null, null)
+                    {
+                        TransactionNotification =
                               string.Format("{0}{1}", message.ToString().Trim().UppercaseFirst(),
                                             string.Format(" @ {0}.{1}.{2}.{3}",
                                                           timestamp.Hour.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'),
                                                           timestamp.Minute.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'),
                                                           timestamp.Second.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'),
                                                           timestamp.Millisecond.ToString(CultureInfo.InvariantCulture).PadLeft(3, '0')))
-                      });
+                    }
+                });
+            }
         }
 
         public void Error(object message)

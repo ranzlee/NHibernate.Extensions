@@ -1,28 +1,30 @@
 using System;
-using System.Collections.Generic;
 using NHibernate.Glimpse.Core;
-using NHibernate.Glimpse.Extensibility;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
     internal class BatcherInternalLogger : IInternalLogger
     {
+        internal delegate void Logging(object sender, LoggingArgs args);
+        internal static event Logging OnLogging;
+
         public void DebugFormat(string format, params object[] args)
         {
+            if (OnLogging == null) return;
             if (format == null) return;
             if (!LoggerFactory.LogRequest()) return;
-            var context = new ContextFactory().GetContextProvider().GetContext();
-            if (context == null) return;
-            var l = (IList<LogStatistic>)context[Plugin.GlimpseSqlStatsKey];
-            if (l == null)
+            var onLogging = OnLogging;
+            if (onLogging != null)
             {
-                l = new List<LogStatistic>();
-                context.Add(Plugin.GlimpseSqlStatsKey, l);
+                onLogging.Invoke(this, new LoggingArgs
+                                           {
+                                               Message = new LogStatistic(null, null)
+                                                             {
+                                                                 CommandNotification =
+                                                                     string.Format(format.Trim().UppercaseFirst(), args),
+                                                             }
+                                           });
             }
-            l.Add(new LogStatistic
-            {
-                CommandNotification = string.Format(format.Trim().UppercaseFirst(), args),
-            });
         }
 
         public void Debug(object message)

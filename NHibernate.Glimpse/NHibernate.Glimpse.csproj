@@ -45,7 +45,6 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InternalLoggers\BatcherInternalLogger.cs" />
@@ -54,11 +53,9 @@
     <Compile Include="InternalLoggers\FlushInternalLogger.cs" />
     <Compile Include="InternalLoggers\LoadInternalLogger.cs" />
     <Compile Include="InternalLoggers\SessionInternalLogger.cs" />
-    <Compile Include="InternalLoggers\SqlCommandExecutedArgs.cs" />
+    <Compile Include="InternalLoggers\LoggingArgs.cs" />
     <Compile Include="InternalLoggers\TransactionInternalLogger.cs" />
     <Compile Include="InternalLoggers\NoLogger.cs" />
-    <Compile Include="Extensibility\HttpContextProvider.cs" />
-    <Compile Include="Extensibility\IContextProvider.cs" />
     <Compile Include="LoggerFactory.cs" />
     <Compile Include="Core\LogParser.cs" />
     <Compile Include="Plugin.cs" />
@@ -66,7 +63,6 @@
     <Compile Include="Core\LogStatistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\RequestDebugInfo.cs" />
-    <Compile Include="Extensibility\ContextFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
