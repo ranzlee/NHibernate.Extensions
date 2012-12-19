@@ -1,37 +1,37 @@
 using System;
 using System.Globalization;
+using Glimpse.Core;
+using Glimpse.Core.Extensibility;
 using NHibernate.Glimpse.Core;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
-    internal class FlushInternalLogger : IInternalLogger
+    internal class FlushInternalLogger : IInternalLogger, IPipelineInspector
     {
-        internal delegate void Logging(object sender, LoggingArgs args);
-        internal static event Logging OnLogging;
+        private static IMessageBroker _messageBroker;
+        private static Func<RuntimePolicy> _runtime;
 
         public void Debug(object message)
         {
-            if (OnLogging == null) return;
+            if (_runtime.Invoke() == RuntimePolicy.Off) return;
             if (message == null) return;
             if (!LoggerFactory.LogRequest()) return;
             var timestamp = DateTime.Now;
-            var onLogging = OnLogging;
-            if (onLogging != null)
-            {
-                onLogging.Invoke(this, new LoggingArgs
-                {
-                    Message = new LogStatistic(null, null)
-                    {
-                        FlushNotification =
-                              string.Format("{0}{1}", message.ToString().Trim().UppercaseFirst(),
-                                            string.Format(" @ {0}.{1}.{2}.{3}",
-                                                          timestamp.Hour.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'),
-                                                          timestamp.Minute.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'),
-                                                          timestamp.Second.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'),
-                                                          timestamp.Millisecond.ToString(CultureInfo.InvariantCulture).PadLeft(3, '0')))
-                    }
-                });
-            }
+            var item = new LogStatistic(null, null)
+                           {
+                               FlushNotification =
+                                   string.Format("{0}{1}", message.ToString().Trim().UppercaseFirst(),
+                                                 string.Format(" @ {0}.{1}.{2}.{3}",
+                                                               timestamp.Hour.ToString(CultureInfo.InvariantCulture)
+                                                                        .PadLeft(2, '0'),
+                                                               timestamp.Minute.ToString(CultureInfo.InvariantCulture)
+                                                                        .PadLeft(2, '0'),
+                                                               timestamp.Second.ToString(CultureInfo.InvariantCulture)
+                                                                        .PadLeft(2, '0'),
+                                                               timestamp.Millisecond.ToString(
+                                                                   CultureInfo.InvariantCulture).PadLeft(3, '0')))
+                           };
+            Log(item);
         }
 
         public void Error(object message)
@@ -122,6 +122,18 @@ namespace NHibernate.Glimpse.InternalLoggers
         public bool IsWarnEnabled
         {
             get { return false; }
+        }
+
+        public void Setup(IPipelineInspectorContext context)
+        {
+            if (context == null) return;
+            _runtime = context.RuntimePolicyStrategy;
+            _messageBroker = context.MessageBroker;
+        }
+
+        void Log(LogStatistic logStatistic)
+        {
+            _messageBroker.Publish(logStatistic);
         }
     }
 }

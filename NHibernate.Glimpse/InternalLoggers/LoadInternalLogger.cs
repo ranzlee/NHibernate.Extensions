@@ -1,32 +1,30 @@
 using System;
+using Glimpse.Core;
+using Glimpse.Core.Extensibility;
 using NHibernate.Glimpse.Core;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
-    internal class LoadInternalLogger : IInternalLogger
+    internal class LoadInternalLogger : IInternalLogger, IPipelineInspector
     {
-        internal delegate void Logging(object sender, LoggingArgs args);
-        internal static event Logging OnLogging;
+        private static IMessageBroker _messageBroker;
+        private static Func<RuntimePolicy> _runtime;
 
         private const string TargetMessage = "done materializing entity";
 
         public void Debug(object message)
         {
-            if (OnLogging == null) return;
+            if (_runtime.Invoke() == RuntimePolicy.Off) return;
             if (message == null) return;
+            if (!LoggerFactory.LogRequest()) return;
             if (!message.ToString().ToLower().Trim().StartsWith(TargetMessage)) return;
             if (!LoggerFactory.LogRequest()) return;
-            var onLogging = OnLogging;
-            if (onLogging != null)
-            {
-                onLogging.Invoke(this, new LoggingArgs
-                {
-                    Message = new LogStatistic(null, null)
-                    {
-                        LoadNotification = message.ToString().Replace(TargetMessage, string.Empty).Trim().UppercaseFirst()
-                    }
-                });
-            }
+            var item = new LogStatistic(null, null)
+                           {
+                               LoadNotification =
+                                   message.ToString().Replace(TargetMessage, string.Empty).Trim().UppercaseFirst()
+                           };
+            Log(item);
         }
 
         public void Error(object message)
@@ -117,6 +115,18 @@ namespace NHibernate.Glimpse.InternalLoggers
         public bool IsWarnEnabled
         {
             get { return false; }
+        }
+
+        public void Setup(IPipelineInspectorContext context)
+        {
+            if (context == null) return;
+            _runtime = context.RuntimePolicyStrategy;
+            _messageBroker = context.MessageBroker;
+        }
+
+        void Log(LogStatistic logStatistic)
+        {
+            _messageBroker.Publish(logStatistic);
         }
     }
 }

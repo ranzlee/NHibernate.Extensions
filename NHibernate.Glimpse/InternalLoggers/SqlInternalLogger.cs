@@ -2,23 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Glimpse.Core;
 using Glimpse.Core.Extensibility;
+using Glimpse.Core.Message;
 using NHibernate.Glimpse.Core;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
-    internal class SqlInternalLogger : IInternalLogger
+    internal class SqlInternalLogger : IInternalLogger, IPipelineInspector
     {
-        private static readonly Assembly ThisAssem = typeof(SqlInternalLogger).Assembly;
-        private static readonly Assembly NhAssem = typeof(IInternalLogger).Assembly;
-        private static readonly Assembly GlimpseAssem = typeof(ITab).Assembly;
-        internal delegate void Logging(object sender, LoggingArgs args);
-        internal static event Logging OnSqlCommandExecuted;
-        internal static event Logging OnLogging;
+        private readonly Assembly _thisAssem = typeof(SqlInternalLogger).Assembly;
+        private readonly Assembly _nhAssem = typeof(IInternalLogger).Assembly;
+        private readonly Assembly _glimpseAssem = typeof (ITab).Assembly;
+        
+        private static IMessageBroker _messageBroker;
+        private static Func<RuntimePolicy> _runtime;
+        private static Func<IExecutionTimer> _timerStrategy;
 
         public void Debug(object message)
         {
-            if (OnLogging == null) return;
+            if (_runtime.Invoke() == RuntimePolicy.Off) return;
             if (message == null) return;
             if (!LoggerFactory.LogRequest()) return;
             var stackFrames = new System.Diagnostics.StackTrace().GetFrames();
@@ -35,9 +38,9 @@ namespace NHibernate.Glimpse.InternalLoggers
                     // ReSharper restore ConditionIsAlwaysTrueOrFalse
                     {
                         var assem = type.Assembly;
-                        if (Equals(assem, ThisAssem)) continue;
-                        if (Equals(assem, NhAssem)) continue;
-                        if (Equals(assem, GlimpseAssem)) continue;    
+                        if (Equals(assem, _thisAssem)) continue;
+                        if (Equals(assem, _nhAssem)) continue;
+                        if (Equals(assem, _glimpseAssem)) continue;    
                     }
                     methods.Add(frame.GetMethod());
                 }
@@ -58,16 +61,8 @@ namespace NHibernate.Glimpse.InternalLoggers
                                                          : methods[0].DeclaringType.Name,
                                ExecutionMethod = (methods.Count == 0) ? null : methods[0].Name,
                            };
-            var onSqlCommandExecuted = OnSqlCommandExecuted;
-            if (onSqlCommandExecuted != null)
-            {
-                onSqlCommandExecuted.Invoke(this, new LoggingArgs { Message = item });
-            }
-            var onLogging = OnLogging;
-            if (onLogging != null)
-            {
-                onLogging.Invoke(this, new LoggingArgs { Message = item });
-            }
+            SqlCommandExecuted(item);
+            Log(item);
         }
 
         public void Error(object message)
@@ -158,6 +153,31 @@ namespace NHibernate.Glimpse.InternalLoggers
         public bool IsWarnEnabled
         {
             get { return false; }
+        }
+
+        public void Setup(IPipelineInspectorContext context)
+        {
+            if (context == null) return;
+            _runtime = context.RuntimePolicyStrategy;
+            _timerStrategy = context.TimerStrategy;
+            _messageBroker = context.MessageBroker;
+        }
+
+        void SqlCommandExecuted(LogStatistic logStatistic)
+        {
+            if (_timerStrategy == null) return;
+            var timer = _timerStrategy.Invoke();
+            if (timer == null) return;
+            var pointTimelineMessage = new PointTimelineMessage(timer.Point(), null, null,
+                                                                string.Format("{0} - {1} :: {2}", logStatistic.Id,
+                                                                              logStatistic.ExecutionType,
+                                                                              logStatistic.ExecutionMethod), "ASP.NET");
+            _messageBroker.Publish(pointTimelineMessage);
+        }
+
+        void Log(LogStatistic logStatistic)
+        {
+            _messageBroker.Publish(logStatistic);
         }
     }
 }

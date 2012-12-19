@@ -9,6 +9,7 @@ namespace NHibernate.Glimpse.Core
     {
         private readonly System.Type _executedType;
         private readonly MethodInfo _executedMethod;
+        private readonly Guid _id = Guid.NewGuid();
 
         internal LogStatistic(System.Type executedType, MethodInfo executedMethod)
         {
@@ -19,7 +20,7 @@ namespace NHibernate.Glimpse.Core
 
         public Guid Id 
         { 
-            get { return Guid.NewGuid(); }
+            get { return _id; }
         }
         
         public System.Type ExecutedType 

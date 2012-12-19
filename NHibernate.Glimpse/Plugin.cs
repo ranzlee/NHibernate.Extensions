@@ -1,24 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Glimpse.Core;
 using Glimpse.Core.Extensions;
-using Glimpse.Core.Message;
 using Glimpse.Core.Tab.Assist;
 using Glimpse.Core.Extensibility;
-using NHibernate.Glimpse.InternalLoggers;
 using NHibernate.Impl;
 using NHibernate.Glimpse.Core;
 using Assist = Glimpse.Core.Tab.Assist;
 
 namespace NHibernate.Glimpse
 {
-    public class Plugin : ITab, IPipelineInspector, ITabSetup, IDocumentation 
+    public class Plugin : ITab, ITabSetup, IDocumentation 
     {
         private static readonly object Lock = new object();
         internal static readonly IList<ISessionFactory> SessionFactories = new List<ISessionFactory>(); 
-        private IMessageBroker _messageBroker;
-        private static Func<IExecutionTimer> _timerStrategy; 
         
         public object GetData(ITabContext context)
         {
@@ -166,43 +161,6 @@ namespace NHibernate.Glimpse
         public string DocumentationUri
         {
             get { return "https://github.com/ranzlee/NHibernate.Extensions/wiki/NHibernate.Glimpse"; }
-        }
-
-        public void Setup(IPipelineInspectorContext context)
-        {
-            if (context == null) return;
-            if (context.RuntimePolicyStrategy == null) return;
-            var runtime = context.RuntimePolicyStrategy.Invoke();
-            if (runtime == RuntimePolicy.Off) return;
-            _timerStrategy = context.TimerStrategy;
-            if (_timerStrategy == null) return;
-            _messageBroker = context.MessageBroker;
-            if (_messageBroker == null) return;
-            SqlInternalLogger.OnSqlCommandExecuted += OnSqlCommandExecuted;
-            SqlInternalLogger.OnLogging += OnLogging;
-            BatcherInternalLogger.OnLogging += OnLogging;
-            ConnectionInternalLogger.OnLogging += OnLogging;
-            FlushInternalLogger.OnLogging += OnLogging;
-            LoadInternalLogger.OnLogging += OnLogging;
-            SessionInternalLogger.OnLogging += OnLogging;
-            TransactionInternalLogger.OnLogging += OnLogging;
-        }
-
-        void OnSqlCommandExecuted(object sender, LoggingArgs args)
-        {
-            if (_timerStrategy == null) return;
-            var timer = _timerStrategy.Invoke();
-            if (timer == null) return;
-            var pointTimelineMessage = new PointTimelineMessage(timer.Point(), null, null,
-                                                                string.Format("{0} - {1} :: {2}", args.Message.Id,
-                                                                              args.Message.ExecutionType,
-                                                                              args.Message.ExecutionMethod), "ASP.NET");
-            _messageBroker.Publish(pointTimelineMessage);
-        }
-
-        void OnLogging(object sender, LoggingArgs args)
-        {
-            _messageBroker.Publish(args.Message);
         }
 
         public void Setup(ITabSetupContext context)

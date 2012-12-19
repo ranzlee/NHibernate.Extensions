@@ -53,7 +53,6 @@
     <Compile Include="InternalLoggers\FlushInternalLogger.cs" />
     <Compile Include="InternalLoggers\LoadInternalLogger.cs" />
     <Compile Include="InternalLoggers\SessionInternalLogger.cs" />
-    <Compile Include="InternalLoggers\LoggingArgs.cs" />
     <Compile Include="InternalLoggers\TransactionInternalLogger.cs" />
     <Compile Include="InternalLoggers\NoLogger.cs" />
     <Compile Include="LoggerFactory.cs" />
