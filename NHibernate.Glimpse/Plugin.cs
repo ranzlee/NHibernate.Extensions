@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Glimpse.Core.Extensions;
 using Glimpse.Core.Tab.Assist;
@@ -30,7 +31,9 @@ namespace NHibernate.Glimpse
                                                "Deletes",
                                                "Batch Commands");
             headerSection.AddRow()
-                         .Column(stat.Selects).Strong()
+                         .Column((stat.Selects > 50)
+                                     ? string.Format("{0} - (ONLY FIRST 50 DISPLAYED)", stat.Selects)
+                                     : stat.Selects.ToString(CultureInfo.InvariantCulture)).Strong()
                          .Column(stat.Inserts)
                          .Column(stat.Updates)
                          .Column(stat.Deletes)
@@ -38,36 +41,59 @@ namespace NHibernate.Glimpse
                          .ErrorIf(stat.Selects > 50);
             var detailSection = new TabSection("Log");
             var sqlCount = 0;
+            var inLoadLog = false;
+            var loaded = 0;
             foreach (var item in logStatistics)
             {
                 if (sqlCount == 50) break;
                 if (!string.IsNullOrEmpty(item.CommandNotification))
                 {
+                    inLoadLog = false;
                     detailSection.AddRow().Column(string.Format("!<span style='color:Red;'>Command: {0}</span>!", item.CommandNotification.Trim()));
                     continue;
                 }
                 if (!string.IsNullOrEmpty(item.ConnectionNotification))
                 {
+                    inLoadLog = false;
                     detailSection.AddRow().Column(string.Format("!<span style='color:Teal;'>Connection: {0}</span>!", item.ConnectionNotification.Trim()));
                     continue;
                 }
                 if (!string.IsNullOrEmpty(item.FlushNotification))
                 {
+                    inLoadLog = false;
                     detailSection.AddRow().Column(string.Format("!<span style='color:DarkSlateGray;'>Flush: {0}</span>!", item.FlushNotification.Trim()));
                     continue;
                 }
                 if (!string.IsNullOrEmpty(item.LoadNotification))
                 {
-                    detailSection.AddRow().Column(string.Format("!<span style='color:DarkSlateBlue;'>Load: {0}</span>!", item.LoadNotification.Trim()));
+                    if (inLoadLog)
+                    {
+                        loaded += 1;
+                    }
+                    else
+                    {
+                        inLoadLog = true;
+                        loaded = 1;
+                    }
+                    if (loaded < 50)
+                    {
+                        detailSection.AddRow().Column(string.Format("!<span style='color:DarkSlateBlue;'>Load: {0}</span>!", item.LoadNotification.Trim()));    
+                    }
+                    if (loaded == 50)
+                    {
+                        detailSection.AddRow().Column("ENTITY LOAD STATS TRUNCATED DUE TO NUMBER OF ENTITIES").Warn();
+                    }
                     continue;
                 }
                 if (!string.IsNullOrEmpty(item.TransactionNotification))
                 {
+                    inLoadLog = false;
                     detailSection.AddRow().Column(string.Format("!<span style='color:Darkorange;'>Transaction: {0}</span>!", item.TransactionNotification.Trim()));
                     continue;
                 }
                 if (!string.IsNullOrEmpty(item.Sql))
                 {
+                    inLoadLog = false;
                     detailSection
                         .AddRow()
                         .Column(string.Format("!<div style='color:RoyalBlue ;'>{0}</div><code class='prettyprint glimpse-code' data-codeType='sql'>{1}</code>!", item.Id, item.Sql))
