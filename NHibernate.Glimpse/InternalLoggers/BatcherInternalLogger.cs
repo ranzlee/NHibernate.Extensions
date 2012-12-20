@@ -12,6 +12,7 @@ namespace NHibernate.Glimpse.InternalLoggers
 
         public void DebugFormat(string format, params object[] args)
         {
+            if (_runtime == null) return;
             if (_runtime.Invoke() == RuntimePolicy.Off) return;
             if (format == null) return;
             if (!LoggerFactory.LogRequest()) return;
@@ -120,8 +121,9 @@ namespace NHibernate.Glimpse.InternalLoggers
             _messageBroker = context.MessageBroker;
         }
 
-        void Log(LogStatistic logStatistic)
+        static void Log(LogStatistic logStatistic)
         {
+            if (_messageBroker == null) return;
             _messageBroker.Publish(logStatistic);
         }
     }
