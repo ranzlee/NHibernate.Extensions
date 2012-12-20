@@ -164,7 +164,7 @@ namespace NHibernate.Glimpse.InternalLoggers
             _messageBroker = context.MessageBroker;
         }
 
-        void SqlCommandExecuted(LogStatistic logStatistic)
+        static void SqlCommandExecuted(LogStatistic logStatistic)
         {
             if (_timerStrategy == null) return;
             var timer = _timerStrategy.Invoke();

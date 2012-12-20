@@ -8,7 +8,7 @@ using System.Security;
 [assembly: AssemblyTitle("NHibernate.DependencyInjection")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Nvergent")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("NHibernate.DependencyInjection")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
@@ -32,6 +32,6 @@ using System.Security;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.3.1.4000")]
-[assembly: AssemblyFileVersion("3.3.1.4000")]
+[assembly: AssemblyVersion("3.3.2.40001")]
+[assembly: AssemblyFileVersion("3.3.2.40001")]
 [assembly: AllowPartiallyTrustedCallers]

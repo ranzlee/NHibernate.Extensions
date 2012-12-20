@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("NHibernate.Glimpse")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Nvergent.org")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("NHibernate.Glimpse")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.3.1.4000")]
-[assembly: AssemblyFileVersion("3.3.1.4000")]
+[assembly: AssemblyVersion("3.3.2.40001")]
+[assembly: AssemblyFileVersion("3.3.2.40001")]
