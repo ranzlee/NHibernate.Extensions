@@ -1,11 +1,10 @@
 using System;
-using Glimpse.Core;
 using Glimpse.Core.Extensibility;
 using NHibernate.Glimpse.Core;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
-    internal class LoadInternalLogger : IInternalLogger, IPipelineInspector
+    internal class LoadInternalLogger : IInternalLogger, IInspector
     {
         private static IMessageBroker _messageBroker;
         private static Func<RuntimePolicy> _runtime;
@@ -118,17 +117,17 @@ namespace NHibernate.Glimpse.InternalLoggers
             get { return false; }
         }
 
-        public void Setup(IPipelineInspectorContext context)
-        {
-            if (context == null) return;
-            _runtime = context.RuntimePolicyStrategy;
-            _messageBroker = context.MessageBroker;
-        }
-
         static void Log(LogStatistic logStatistic)
         {
             if (_messageBroker == null) return;
             _messageBroker.Publish(logStatistic);
+        }
+
+        public void Setup(IInspectorContext context)
+        {
+            if (context == null) return;
+            _runtime = context.RuntimePolicyStrategy;
+            _messageBroker = context.MessageBroker;
         }
     }
 }

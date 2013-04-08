@@ -1,12 +1,11 @@
 using System;
 using System.Globalization;
-using Glimpse.Core;
 using Glimpse.Core.Extensibility;
 using NHibernate.Glimpse.Core;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
-    internal class ConnectionInternalLogger : IInternalLogger, IPipelineInspector
+    internal class ConnectionInternalLogger : IInternalLogger, IInspector
     {
         private static IMessageBroker _messageBroker;
         private static Func<RuntimePolicy> _runtime;
@@ -125,7 +124,7 @@ namespace NHibernate.Glimpse.InternalLoggers
             get { return false; }
         }
 
-        public void Setup(IPipelineInspectorContext context)
+        public void Setup(IInspectorContext context)
         {
             if (context == null) return;
             _runtime = context.RuntimePolicyStrategy;

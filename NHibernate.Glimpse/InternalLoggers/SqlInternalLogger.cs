@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Glimpse.Core;
 using Glimpse.Core.Extensibility;
-using Glimpse.Core.Message;
 using NHibernate.Glimpse.Core;
 
 namespace NHibernate.Glimpse.InternalLoggers
 {
-    internal class SqlInternalLogger : IInternalLogger, IPipelineInspector
+    internal class SqlInternalLogger : IInternalLogger, IInspector
     {
         private readonly Assembly _thisAssem = typeof(SqlInternalLogger).Assembly;
         private readonly Assembly _nhAssem = typeof(IInternalLogger).Assembly;
@@ -156,7 +154,7 @@ namespace NHibernate.Glimpse.InternalLoggers
             get { return false; }
         }
 
-        public void Setup(IPipelineInspectorContext context)
+        public void Setup(IInspectorContext context)
         {
             if (context == null) return;
             _runtime = context.RuntimePolicyStrategy;
@@ -169,11 +167,17 @@ namespace NHibernate.Glimpse.InternalLoggers
             if (_timerStrategy == null) return;
             var timer = _timerStrategy.Invoke();
             if (timer == null) return;
-            var pointTimelineMessage = new PointTimelineMessage(timer.Point(), null, null,
-                                                                string.Format("{0} - {1} :: {2}", logStatistic.Id,
-                                                                              logStatistic.ExecutionType,
-                                                                              logStatistic.ExecutionMethod), "ASP.NET");
-            _messageBroker.Publish(pointTimelineMessage);
+            var point = timer.Point();
+
+            var pointTimelineMessage = new NHibernateTimelineMessage
+                                           {
+                                               Duration = point.Duration,
+                                               Offset = point.Offset,
+                                               StartTime = point.StartTime,
+                                               EventName = logStatistic.ExecutionType,
+                                               EventSubText = logStatistic.ExecutionMethod
+                                           };
+          _messageBroker.Publish(pointTimelineMessage);
         }
 
         static void Log(LogStatistic logStatistic)
