@@ -174,8 +174,8 @@ namespace NHibernate.Glimpse.InternalLoggers
                                                Duration = point.Duration,
                                                Offset = point.Offset,
                                                StartTime = point.StartTime,
-                                               EventName = logStatistic.ExecutionType,
-                                               EventSubText = logStatistic.ExecutionMethod
+                                               EventName = string.Format("{0}:{1}", logStatistic.ExecutionType, logStatistic.ExecutionMethod),
+                                               EventSubText = logStatistic.Id.ToString()
                                            };
           _messageBroker.Publish(pointTimelineMessage);
         }

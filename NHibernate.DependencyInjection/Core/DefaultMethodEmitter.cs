@@ -83,7 +83,7 @@ namespace NHibernate.DependencyInjection.Core
             il.Emit(OpCodes.Ldarg_0);
             var declaringType = method.DeclaringType;
             il.Emit(OpCodes.Ldtoken, method);
-            if (declaringType.IsGenericType)
+            if (declaringType != null && declaringType.IsGenericType)
             {
                 il.Emit(OpCodes.Ldtoken, declaringType);
                 il.Emit(OpCodes.Call, GetGenericMethodFromHandle);
