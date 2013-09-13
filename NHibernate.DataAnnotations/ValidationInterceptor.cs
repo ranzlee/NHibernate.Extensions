@@ -161,7 +161,7 @@ namespace NHibernate.DataAnnotations
                     throw new ArgumentOutOfRangeException(persistenceOperation.ToString());
             }
             var validationResults = EntityValidator.DoMemberValidation(o, epc).ToList();
-            if (validationResults.Count() == 0)
+            if (!validationResults.Any())
             {
                 if (_validationResults.ContainsKey(o))
                 {

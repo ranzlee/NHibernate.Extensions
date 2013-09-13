@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Glimpse</id>
-    <version>1.2.0</version>
+    <version>1.6.1</version>
     <title>Glimpse Core</title>
     <authors>nmolnar,  avanderhoorn</authors>
     <owners>nmolnar,  avanderhoorn</owners>
@@ -12,15 +12,12 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Glimpse is a web debugging and diagnostics tool used to gain a better understanding of whats happening inside of your ASP.NET 4.0 application. For ASP.NET MVC3 support, please NuGet Glimpse.MVC3.</description>
     <summary>ASP.NET 4.0 web debugging and diagnostics tool.</summary>
-    <releaseNotes>Minor release for core:
- - Fixed issue in timeline which affected sub 1 ms events.
- - Fixed trailing comma that causes problems with some browsers/browser modes.
- - Minor refactoring of MessageCategory classes. 
- - Minor update to Nuget transform to show how to turn on logging.
- - Minor update to config page to make sure you always get latest logo.</releaseNotes>
+    <releaseNotes>Welterweight release for Core:
+ - Switch images on Glimpse.axd page to their DataUri representations to avoid mixed content requests
+ - Switch href over from using "#" to "javascript:void(0)"
+ - Remove trailing commas in client
+ - Switch logo on the About tab over to the new logo
+ - Removed IpAddress as its not used anywhere</releaseNotes>
     <tags>ASP.NET Web WebForms Glimpse diagnostics performance profiling timing</tags>
-    <references>
-      <reference file="Glimpse.Core.dll" />
-    </references>
   </metadata>
 </package>
