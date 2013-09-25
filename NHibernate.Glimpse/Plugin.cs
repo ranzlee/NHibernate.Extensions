@@ -180,7 +180,7 @@ namespace NHibernate.Glimpse
             if (sessionFactory == null) throw new NullReferenceException("sessionFactory");
             lock (Lock)
             {
-                if (!SessionFactories.Contains(sessionFactory)) SessionFactories.Add(sessionFactory);    
+                if (!SessionFactories.Contains(sessionFactory)) SessionFactories.Add(sessionFactory);
             }
         }
 

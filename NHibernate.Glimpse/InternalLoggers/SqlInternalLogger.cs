@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Glimpse.Core.Extensibility;
@@ -23,8 +24,9 @@ namespace NHibernate.Glimpse.InternalLoggers
             if (_runtime.Invoke() == RuntimePolicy.Off) return;
             if (message == null) return;
             if (!LoggerFactory.LogRequest()) return;
-            var stackFrames = new System.Diagnostics.StackTrace().GetFrames();
+            var stackFrames = new StackTrace(true).GetFrames();
             var methods = new List<MethodBase>();
+            var stackTrace = new List<StackFrame>();
             if (stackFrames != null)
             {
                 foreach (var frame in stackFrames)
@@ -39,14 +41,30 @@ namespace NHibernate.Glimpse.InternalLoggers
                         var assem = type.Assembly;
                         if (Equals(assem, _thisAssem)) continue;
                         if (Equals(assem, _nhAssem)) continue;
-                        if (Equals(assem, _glimpseAssem)) continue;    
+                        if (Equals(assem, _glimpseAssem)) continue;
                     }
-                    methods.Add(frame.GetMethod());
+                    methods.Add(meth);
+                    stackTrace.Add(frame);
                 }
             }
             // ReSharper disable ConditionIsAlwaysTrueOrFalse
-            var frames = methods
-                .Select(method => string.Format("{0} -> {1}", (method.DeclaringType == null) ? "DYNAMIC" : method.DeclaringType.ToString(), method))
+            var frames = stackTrace
+                .Select(frame =>
+                {
+                    var method = frame.GetMethod();
+                    var fileName = frame.GetFileName();
+                    var hasFileName = fileName != null;
+                    var displayPrefix = hasFileName ? "[#] " : ""; // visual cue that the frame has file info if expanded
+                    var displaySuffix = hasFileName ?
+                        string.Format(" @ {0}, line {1}, column {2}",
+                            fileName,
+                            frame.GetFileLineNumber(),
+                            frame.GetFileColumnNumber()) :
+                        "";
+
+                    return string.Format(displayPrefix + "{0} -> {1}" + displaySuffix,
+                        (method.DeclaringType == null) ? "DYNAMIC" : method.DeclaringType.ToString(), method);
+                })
                 .ToList();
             // ReSharper restore ConditionIsAlwaysTrueOrFalse
             var item = new LogStatistic(null, null)
