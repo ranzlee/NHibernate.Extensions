@@ -55,7 +55,6 @@
     <Compile Include="InternalLoggers\LoadInternalLogger.cs" />
     <Compile Include="InternalLoggers\SessionInternalLogger.cs" />
     <Compile Include="InternalLoggers\TransactionInternalLogger.cs" />
-    <Compile Include="InternalLoggers\NoLogger.cs" />
     <Compile Include="LoggerFactory.cs" />
     <Compile Include="Core\LogParser.cs" />
     <Compile Include="NHibernateTimelineMessage.cs" />

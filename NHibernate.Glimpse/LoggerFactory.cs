@@ -58,13 +58,13 @@ namespace NHibernate.Glimpse
 
         public IInternalLogger LoggerFor(string keyName)
         {
-            if (keyName == null) return new NoLogger();
-            return keyName.ToLower().Trim() == "nhibernate.sql" ? (IInternalLogger) new SqlInternalLogger() : new NoLogger();
+            if (keyName == null) return new NoLoggingInternalLogger();
+            return keyName.ToLower().Trim() == "nhibernate.sql" ? (IInternalLogger) new SqlInternalLogger() : new NoLoggingInternalLogger();
         }
 
         public IInternalLogger LoggerFor(System.Type type)
         {
-            if (type == null) return new NoLogger();
+            if (type == null) return new NoLoggingInternalLogger();
             return GetLogger(type);
         }
 
@@ -94,7 +94,7 @@ namespace NHibernate.Glimpse
             {
                 if (HasFlushLogger) return new FlushInternalLogger();
             }
-            return new NoLogger();
+            return new NoLoggingInternalLogger();
         }
 
         internal static bool LogRequest()
