@@ -127,7 +127,7 @@ namespace NHibernate.Glimpse.InternalLoggers
         public void Setup(IInspectorContext context)
         {
             if (context == null) return;
-            _runtime = context.RuntimePolicyStrategy;
+            _runtime = context.RuntimePolicyStrategy.Safe();
             _messageBroker = context.MessageBroker;
         }
 
